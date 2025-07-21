@@ -1,20 +1,41 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
     provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+    provider  = "postgresql"
+    url       = env("DATABASE_URL")
+    directUrl = env("DIRECT_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+model User {
+    id          String   @id @default(cuid())
+    email       String   @unique
+    username    String   @unique
+    displayName String?
+    avatarUrl   String?
+    bio         String?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
 
-    @@index([name])
+    // Relations
+    questions Question[]
+
+    @@map("users")
+}
+
+model Question {
+    id         String   @id @default(cuid())
+    content    String
+    answer     String?
+    isAnswered Boolean  @default(false)
+    isDeleted  Boolean  @default(false)
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+
+    // Relations
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@map("questions")
 }
